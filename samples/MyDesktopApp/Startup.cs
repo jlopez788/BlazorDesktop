@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Components.Builder;
+using Microsoft.AspNetCore.Components.Desktop;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MyDesktopApp

@@ -1,18 +1,33 @@
-﻿using Microsoft.AspNetCore.Components.Builder;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Microsoft.AspNetCore.Components.Desktop
 {
+    internal struct ComponentNodeSelector
+    {
+        public Type ComponentType { get; }
+        public string NodeSelector { get; }
+
+        public ComponentNodeSelector(Type componentType, string nodeSelector)
+        {
+            ComponentType = componentType;
+            NodeSelector = nodeSelector;
+        }
+
+        public override int GetHashCode() => ComponentType?.GetHashCode() ?? 0;
+
+        public override bool Equals(object obj) => obj is ComponentNodeSelector selector && selector.ComponentType == ComponentType;
+    }
+
     internal class DesktopApplicationBuilder : IComponentsApplicationBuilder
     {
         public DesktopApplicationBuilder(IServiceProvider services)
         {
             Services = services;
-            Entries = new List<(Type componentType, string domElementSelector)>();
+            Entries = new HashSet<ComponentNodeSelector>();
         }
 
-        public List<(Type componentType, string domElementSelector)> Entries { get; }
+        public HashSet<ComponentNodeSelector> Entries { get; }
 
         public IServiceProvider Services { get; }
 
@@ -28,7 +43,7 @@ namespace Microsoft.AspNetCore.Components.Desktop
                 throw new ArgumentNullException(nameof(domElementSelector));
             }
 
-            Entries.Add((componentType, domElementSelector));
+            Entries.Add(new ComponentNodeSelector(componentType, domElementSelector));
         }
     }
 }

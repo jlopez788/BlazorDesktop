@@ -28,14 +28,12 @@ namespace Microsoft.AspNetCore.Components.Desktop
             var form = new RootForm();
             configure?.Invoke(form);
 
-            DesktopSynchronizationContext.UnhandledException += (sender, exception) =>
-            {
+            DesktopSynchronizationContext.UnhandledException += (sender, exception) => {
                 UnhandledException(exception);
             };
 
             CancellationTokenSource appLifetimeCts = new CancellationTokenSource();
-            Task.Factory.StartNew(async() =>
-            {
+            Task.Factory.StartNew(async () => {
                 try
                 {
                     var ipc = form.CreateChannel(hostHtmlPath);
@@ -85,14 +83,13 @@ namespace Microsoft.AspNetCore.Components.Desktop
             var loggerFactory = services.GetRequiredService<ILoggerFactory>();
 
             DesktopRenderer = new DesktopRenderer(services, ipc, loggerFactory);
-            DesktopRenderer.UnhandledException += (sender, exception) =>
-            {
+            DesktopRenderer.UnhandledException += (sender, exception) => {
                 Console.Error.WriteLine(exception);
             };
 
             foreach (var rootComponent in builder.Entries)
             {
-                _ = DesktopRenderer.AddComponentAsync(rootComponent.componentType, rootComponent.domElementSelector);
+                _ = DesktopRenderer.AddComponentAsync(rootComponent.ComponentType, rootComponent.NodeSelector);
             }
         }
 
@@ -115,8 +112,7 @@ namespace Microsoft.AspNetCore.Components.Desktop
 
             var cts = new CancellationTokenSource();
             var incomingHandshakeCancellationToken = cts.Token;
-            ipc.Once("components:init", args =>
-            {
+            ipc.Once("components:init", args => {
                 var argsArray = (object[])args;
                 InitialUriAbsolute = ((JsonElement)argsArray[0]).GetString();
                 BaseUriAbsolute = ((JsonElement)argsArray[1]).GetString();
@@ -145,10 +141,8 @@ namespace Microsoft.AspNetCore.Components.Desktop
             var desktopSynchronizationContext = new DesktopSynchronizationContext(appLifetime);
             SynchronizationContext.SetSynchronizationContext(desktopSynchronizationContext);
 
-            ipc.On("BeginInvokeDotNetFromJS", args =>
-            {
-                desktopSynchronizationContext.Send(state =>
-                {
+            ipc.On("BeginInvokeDotNetFromJS", args => {
+                desktopSynchronizationContext.Send(state => {
                     var argsArray = (object[])state;
                     DotNetDispatcher.BeginInvokeDotNet(
                         DesktopJSRuntime,
@@ -161,10 +155,8 @@ namespace Microsoft.AspNetCore.Components.Desktop
                 }, args);
             });
 
-            ipc.On("EndInvokeJSFromDotNet", args =>
-            {
-                desktopSynchronizationContext.Send(state =>
-                {
+            ipc.On("EndInvokeJSFromDotNet", args => {
+                desktopSynchronizationContext.Send(state => {
                     var argsArray = (object[])state;
                     DotNetDispatcher.EndInvokeJS(
                         DesktopJSRuntime,
